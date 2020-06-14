@@ -14,12 +14,12 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="foodie-api" target="1.5" />
-      <module name="foodie-common" target="1.5" />
-      <module name="foodie-dev" target="1.5" />
-      <module name="foodie-mapper" target="1.5" />
-      <module name="foodie-pojo" target="1.5" />
-      <module name="foodie-service" target="1.5" />
+      <module name="foodie-api" target="1.8" />
+      <module name="foodie-common" target="1.8" />
+      <module name="foodie-dev" target="1.8" />
+      <module name="foodie-mapper" target="1.8" />
+      <module name="foodie-pojo" target="1.8" />
+      <module name="foodie-service" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
