@@ -35,6 +35,12 @@ spring:
 ###############################################################################
 mybatis:
   type-aliases-package: com.lxk.pojo                                #所有pojo类所在包路径
-  mapper-locations: classpath:mapper/*.xml                          #mapper映射文件
+  mapper-locations: classpath:mapper/*.xml                           #mapper映射文件
 
+################################################################################
+#通用mapper配置
+mapper:
+  mappers: com.lxk.my.mapper.MyMapper
+  not-empty: false        #在进行数据库操作的时候，判断表达式 username != null 是否追加username ！= ‘’
+  identity: MYSQL
 
