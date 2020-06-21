@@ -23,4 +23,9 @@ public interface UserService {
      * @return User
      * */
     public Users createUser(UserBO userBO);
+
+    /**
+     * 检索用户名和密码是否匹配
+     * */
+    public Users queryUserForLogin(String username,String password);
 }

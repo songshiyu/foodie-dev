@@ -1,13 +1,17 @@
 package com.lxk.controller;
 
+import com.lxk.pojo.Users;
 import com.lxk.pojo.bo.UserBO;
 import com.lxk.service.UserService;
+import com.lxk.utils.MD5Utils;
 import com.lxk.utils.ResultJSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @author songshiyu
@@ -40,6 +44,28 @@ public class PassportController {
         return ResultJSONResult.ok();
     }
 
+
+    @ApiOperation(value = "用户登录",notes = "用户登录",httpMethod = "POST")
+    @PostMapping("/login")
+    public ResultJSONResult login(@RequestBody UserBO userBO) throws NoSuchAlgorithmException {
+
+        String username = userBO.getUsername();
+        String password = userBO.getPassword();
+
+        //0.判断用户名和密码必须不为空
+        if (StringUtils.isBlank(username) ||
+                StringUtils.isBlank(password)){
+            return ResultJSONResult.errorMsg("用户名或密码不能为空");
+        }
+
+        //1.实现登录
+        Users usersResult = userService.queryUserForLogin(username, MD5Utils.getMD5Str(password));
+
+        if (usersResult == null){
+            return ResultJSONResult.errorMsg("用户名或密码不正确");
+        }
+        return ResultJSONResult.ok(usersResult);
+    }
 
     @ApiOperation(value = "用户注册",notes = "用户注册",httpMethod = "POST")
     @PostMapping("/regist")
@@ -76,6 +102,5 @@ public class PassportController {
         userService.createUser(userBO);
         return ResultJSONResult.ok();
     }
-
 
 }
