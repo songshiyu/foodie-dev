@@ -73,7 +73,7 @@ public class PassportController {
         usersResult = setNullProperty(usersResult);
 
         //设置cookie
-        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersResult));
+        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersResult),true);
         return ResultJSONResult.ok(usersResult);
     }
 
@@ -115,7 +115,7 @@ public class PassportController {
         usersResult = setNullProperty(usersResult);
 
         //设置cookie
-        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersResult));
+        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersResult),true);
         return ResultJSONResult.ok();
     }
 
@@ -129,6 +129,21 @@ public class PassportController {
         usersResult.setBirthday(null);
 
         return usersResult;
+    }
+
+    @ApiOperation(value = "用户退出登录", notes = "用户退出登录", httpMethod = "POST")
+    @PostMapping("/logout")
+    public ResultJSONResult logout(@RequestParam String userId,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) {
+
+        //清除用户相关信息的cookie
+        CookieUtils.deleteCookie(request,response,"user");
+
+        //TODO 用户退出登录，需要清空购物车
+
+        //TODO 分布式会话中需要清除用户数据
+        return ResultJSONResult.ok();
     }
 
 }

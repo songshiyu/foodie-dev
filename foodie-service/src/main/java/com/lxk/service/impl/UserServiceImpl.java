@@ -24,7 +24,7 @@ import java.util.Date;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final String USER_FACE = "";
+    private static final String USER_FACE = "111";
 
     @Autowired
     private UsersMapper usersMapper;
