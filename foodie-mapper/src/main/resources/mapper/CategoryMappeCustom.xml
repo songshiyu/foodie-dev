@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lxk.mapper.CategoryMapper" >
+<mapper namespace="com.lxk.mapper.CategoryMapperCustom">
+
+	<resultMap id="myCategoryVO" type="com.lxk.pojo.vo.CategoryVO">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="fatherId" property="fatherId" jdbcType="INTEGER" />
+
+		<!--
+		 collection标签：用于定义关联的list集合类型的封装规则
+		 	property：对应三级分类的list属性名
+		 	ofType： 集合的类型，三级分类的VO
+		 -->
+		<collection property="subCatList" ofType="com.lxk.pojo.vo.SubCategoryVO">
+			<id column="subId" property="subId" jdbcType="INTEGER" />
+			<result column="subName" property="subName" jdbcType="VARCHAR" />
+			<result column="subType" property="subType" jdbcType="INTEGER" />
+			<result column="subFatherId" property="subFatherId" jdbcType="INTEGER" />
+		</collection>
+	</resultMap>
+
+    <select id="getSubCatList" resultMap="myCategoryVO" parameterType="int">
+    SELECT
+		f.id as id,
+		f.`name` as `name`,
+		f.type as type,
+		f.father_id as fatherId,
+
+		c.id as subId,
+		c.`name` as subName,
+		c.type as subType,
+		c.father_id as subFatherId
+	FROM
+ 		category f
+	LEFT JOIN
+		category c
+	on f.id = c.father_id
+	WHERE f.father_id = #{rootCatId}
+  </select>
 
 </mapper>

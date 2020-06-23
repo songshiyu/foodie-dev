@@ -3,13 +3,16 @@ package com.lxk.controller;
 import com.lxk.enums.YesOrNo;
 import com.lxk.pojo.Carousel;
 import com.lxk.pojo.Category;
+import com.lxk.pojo.vo.CategoryVO;
 import com.lxk.service.CarouselService;
 import com.lxk.service.CategoryService;
 import com.lxk.utils.ResultJSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
@@ -47,5 +50,19 @@ public class IndexController {
     public ResultJSONResult cats() {
         List<Category> categories = categoryService.queryAllRootLevelcat();
         return ResultJSONResult.ok(categories);
+    }
+
+    @ApiOperation(value = "获取商品子分类", notes = "获取商品子分类", httpMethod = "GET")
+    @GetMapping("/subCat/{rootCatId}")
+    public ResultJSONResult subCat(
+            @ApiParam(name = "rootCatId",value = "一级分类id",required = true)
+            @PathVariable Integer rootCatId) {
+
+        if (rootCatId == null){
+            return ResultJSONResult.errorMsg("分类不存在");
+        }
+
+        List<CategoryVO> subCatLIst = categoryService.getSubCatLIst(rootCatId);
+        return ResultJSONResult.ok(subCatLIst);
     }
 }
