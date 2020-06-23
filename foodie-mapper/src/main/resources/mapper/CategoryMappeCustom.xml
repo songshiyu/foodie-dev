@@ -21,6 +21,19 @@
 		</collection>
 	</resultMap>
 
+	<resultMap id="myNewItemsVO" type="com.lxk.pojo.vo.NewItemsVO">
+		<id column="rootCatId" property="rootCatId" jdbcType="INTEGER" />
+		<result column="rootCatname" property="rootCatname" jdbcType="VARCHAR" />
+		<result column="slogan" property="slogan" jdbcType="VARCHAR" />
+		<result column="bgColor" property="bgColor" jdbcType="VARCHAR" />
+
+		<collection property="simpleItemList" ofType="com.lxk.pojo.vo.SimpleItemVO">
+			<id column="itemId" property="itemId" jdbcType="VARCHAR" />
+			<result column="itemName" property="itemName" jdbcType="VARCHAR" />
+			<result column="itemUrl" property="itemUrl" jdbcType="INTEGER" />
+		</collection>
+	</resultMap>
+
     <select id="getSubCatList" resultMap="myCategoryVO" parameterType="int">
     SELECT
 		f.id as id,
@@ -40,4 +53,31 @@
 	WHERE f.father_id = #{rootCatId}
   </select>
 
+	<select id="getSixNewItemslazy" resultMap="myNewItemsVO" parameterType="Map">
+		SELECT
+			f.id as rootCatId,
+			f.`name` as rootCatname,
+			f.slogan as slogan,
+			f.cat_image as catImage,
+			f.bg_color as bgColor,
+
+			i.id as itemId,
+			i.item_name as itemName,
+			ii.url as itemUrl,
+			i.created_time as createdTime
+		FROM
+			category f
+		LEFT JOIN items i ON f.id = i.root_cat_id
+		LEFT JOIN items_img ii ON i.id = ii.item_id
+		WHERE
+			f.type = 1
+		AND
+			i.root_cat_id = #{paramsMap.rootCatId}
+		AND
+			ii.is_main = 1
+		ORDER BY
+			i.created_time
+		DESC
+		LIMIT 0,6
+	</select>
 </mapper>

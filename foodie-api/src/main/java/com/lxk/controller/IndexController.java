@@ -4,6 +4,7 @@ import com.lxk.enums.YesOrNo;
 import com.lxk.pojo.Carousel;
 import com.lxk.pojo.Category;
 import com.lxk.pojo.vo.CategoryVO;
+import com.lxk.pojo.vo.NewItemsVO;
 import com.lxk.service.CarouselService;
 import com.lxk.service.CategoryService;
 import com.lxk.utils.ResultJSONResult;
@@ -64,5 +65,19 @@ public class IndexController {
 
         List<CategoryVO> subCatLIst = categoryService.getSubCatLIst(rootCatId);
         return ResultJSONResult.ok(subCatLIst);
+    }
+
+    @ApiOperation(value = "查询每个一级分类下6个最新的商品信息", notes = "查询每个一级分类下6个最新的商品信息", httpMethod = "GET")
+    @GetMapping("/sixNewItems/{rootCatId}")
+    public ResultJSONResult sixNewItems(
+            @ApiParam(name = "rootCatId",value = "一级分类id",required = true)
+            @PathVariable Integer rootCatId) {
+
+        if (rootCatId == null){
+            return ResultJSONResult.errorMsg("分类不存在");
+        }
+
+        List<NewItemsVO> sixNewItemslazyList = categoryService.getSixNewItemslazy(rootCatId);
+        return ResultJSONResult.ok(sixNewItemslazyList);
     }
 }
