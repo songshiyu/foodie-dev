@@ -45,4 +45,8 @@ mapper:
   mappers: com.lxk.my.mapper.MyMapper
   not-empty: false        #在进行数据库操作的时候，判断表达式 username != null 是否追加username ！= ‘’
   identity: MYSQL
+#@mybaits分页配置
+pagehelper:
+  helper-dialect: mysql
+  support-methods-arguments: true
 

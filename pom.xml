@@ -73,6 +73,12 @@
             <version>2.1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+
         <!--mapper-->
         <dependency>
             <groupId>tk.mybatis</groupId>
@@ -131,6 +137,8 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.21</version>
         </dependency>
+
+
     </dependencies>
 
 </project>
