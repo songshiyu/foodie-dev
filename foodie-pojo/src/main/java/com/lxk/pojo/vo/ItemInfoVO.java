@@ -19,13 +19,13 @@ public class ItemInfoVO {
     private Items item;
     private List<ItemsImg> itemImgsList;
     private List<ItemsSpec> itemSpecList;
-    private ItemsParam itemParam;
+    private ItemsParam itemParams;
 
-    public ItemInfoVO(Items item, List<ItemsImg> itemImgsList, List<ItemsSpec> itemSpecList, ItemsParam itemParam) {
+    public ItemInfoVO(Items item, List<ItemsImg> itemImgsList, List<ItemsSpec> itemSpecList, ItemsParam itemParams) {
         this.item = item;
         this.itemImgsList = itemImgsList;
         this.itemSpecList = itemSpecList;
-        this.itemParam = itemParam;
+        this.itemParams = itemParams;
     }
 
     public Items getItem() {
@@ -52,11 +52,11 @@ public class ItemInfoVO {
         this.itemSpecList = itemSpecList;
     }
 
-    public ItemsParam getItemParam() {
-        return itemParam;
+    public ItemsParam getItemParams() {
+        return itemParams;
     }
 
-    public void setItemParam(ItemsParam itemParam) {
-        this.itemParam = itemParam;
+    public void setItemParams(ItemsParam itemParams) {
+        this.itemParams = itemParams;
     }
 }

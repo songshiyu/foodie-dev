@@ -4,6 +4,7 @@ import com.lxk.pojo.Items;
 import com.lxk.pojo.ItemsImg;
 import com.lxk.pojo.ItemsParam;
 import com.lxk.pojo.ItemsSpec;
+import com.lxk.pojo.vo.CommentLevelCountsVO;
 import com.lxk.pojo.vo.ItemInfoVO;
 import com.lxk.service.ItemService;
 import com.lxk.utils.ResultJSONResult;
@@ -12,10 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -51,5 +49,20 @@ public class ItemsController {
         ItemInfoVO itemInfoVO = new ItemInfoVO(item,itemsImgsList,itemsSpecList,itemsParam);
 
         return ResultJSONResult.ok(itemInfoVO);
+    }
+
+
+    @ApiOperation(value = "查询商品评价等级", notes = "查询商品评价等级", httpMethod = "GET")
+    @GetMapping("/commentLevel")
+    public ResultJSONResult commentLevel(
+            @ApiParam(name = "itemId",value = "商品id",required = true)
+            @RequestParam String itemId) {
+
+        if (StringUtils.isBlank(itemId)){
+            return ResultJSONResult.errorMsg(null);
+        }
+
+        CommentLevelCountsVO countsVO = itemService.queryCommentCounts(itemId);
+        return ResultJSONResult.ok(countsVO);
     }
 }
