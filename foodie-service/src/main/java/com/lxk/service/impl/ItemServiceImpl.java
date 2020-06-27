@@ -7,6 +7,7 @@ import com.lxk.mapper.*;
 import com.lxk.pojo.*;
 import com.lxk.pojo.vo.CommentLevelCountsVO;
 import com.lxk.pojo.vo.ItemCommentsVO;
+import com.lxk.pojo.vo.SearchItemsVO;
 import com.lxk.service.ItemService;
 import com.lxk.utils.DesensitizationUtil;
 import com.lxk.utils.PagedGridResult;
@@ -118,6 +119,32 @@ public class ItemServiceImpl implements ItemService {
 
         PagedGridResult gridResult = setterPagedgrid(itemCommentsVoList, page);
         return gridResult;
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public PagedGridResult searchItems(String keywords, String sort, Integer page, Integer pageSize) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("keywords", keywords);
+        map.put("sort", sort);
+
+        PageHelper.startPage(page, pageSize);
+        List<SearchItemsVO> list = itemsMapperCustom.searchItems(map);
+
+        return setterPagedgrid(list,page);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public PagedGridResult searchItems(Integer catId, String sort, Integer page, Integer pageSize) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("catId", catId);
+        map.put("sort", sort);
+
+        PageHelper.startPage(page, pageSize);
+        List<SearchItemsVO> list = itemsMapperCustom.searchItemsByThirdCat(map);
+
+        return setterPagedgrid(list,page);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)

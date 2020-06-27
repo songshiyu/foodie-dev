@@ -13,4 +13,10 @@ public class BaseController {
      * 评论默认的分页每页条数
      * */
     public static final Integer COMMENT_PAGE_SIZE = 10;
+
+    /**
+     * 通用分页
+     * */
+    public static final Integer PAGE_SIZE = 20;
+
 }

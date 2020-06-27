@@ -1,36 +1,139 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lxk.mapper.ItemsMapperCustom" >
+<mapper namespace="com.lxk.mapper.ItemsMapperCustom">
 
     <resultMap id="itemCommentsVO" type="com.lxk.pojo.vo.ItemCommentsVO">
         <result column="commentLevel" property="commentLevel"/>
         <result column="content" property="content"/>
         <result column="sepcName" property="sepcName"/>
         <result column="createdTime" property="createdTime"/>
-        <result column="userFace" property="userFace" />
-        <result column="nickname" property="nickname" />
+        <result column="userFace" property="userFace"/>
+        <result column="nickname" property="nickname"/>
     </resultMap>
 
-  <select id="queryItemComments" parameterType="Map" resultMap="itemCommentsVO">
-    SELECT
-       ic.comment_level as commentLevel,
-       ic.content as content,
-       ic.sepc_name as sepcName,
-       ic.created_time as createdTime,
-       u.face as userFace,
-       u.nickname as nickname
-    FROM
+    <resultMap id="searchItemsVO" type="com.lxk.pojo.vo.SearchItemsVO">
+        <result column="itemId" property="itemId"/>
+        <result column="itemName" property="itemName"/>
+        <result column="sellCounts" property="sellCounts"/>
+        <result column="imgUrl" property="imgUrl"/>
+        <result column="price" property="price"/>
+    </resultMap>
+
+    <select id="queryItemComments" parameterType="Map" resultMap="itemCommentsVO">
+        SELECT
+        ic.comment_level as commentLevel,
+        ic.content as content,
+        ic.sepc_name as sepcName,
+        ic.created_time as createdTime,
+        u.face as userFace,
+        u.nickname as nickname
+        FROM
         items_comments ic
-    LEFT JOIN
+        LEFT JOIN
         users u
-    ON
+        ON
         ic.user_id = u.id
-    WHERE
+        WHERE
         ic.item_id = #{paramsMap.itemId}
-          <if test="paramsMap.level != null and paramsMap.level != ''">
+        <if test="paramsMap.level != null and paramsMap.level != ''">
             AND
             ic.comment_level = #{paramsMap.level}
-          </if>
-  </select>
+        </if>
+    </select>
 
+
+    <select id="searchItems" parameterType="Map" resultMap="searchItemsVO">
+        SELECT
+        i.id as itemId,
+        i.item_name as itemName,
+        i.sell_counts as sellCounts,
+        ii.url as imgUrl,
+        tempSpec.price_discount as price
+        FROM
+        items i
+        LEFT JOIN
+        items_img ii
+        ON
+        i.id = ii.item_id
+        LEFT JOIN
+        (
+        SELECT
+        item_id,
+        MIN(price_discount) as price_discount
+        from
+        items_spec
+        GROUP BY
+        item_id
+        ) tempSpec
+        on
+        i.id = tempSpec.item_id
+        WHERE
+        ii.is_main = 1
+        <if test="paramsMap.keywords != null and paramsMap.keywords != ''">
+            AND
+            i.item_name LIKE '%${paramsMap.keywords}%'
+        </if>
+        ORDER BY
+        <choose>
+            <when test="paramsMap.sort == &quot;c &quot;">
+                i.sell_counts DESC
+            </when>
+
+            <when test="paramsMap.sort ==  &quot;p &quot;">
+                tempSpec.price_discount ASC
+            </when>
+
+            <otherwise>
+                i.item_name ASC
+            </otherwise>
+        </choose>
+    </select>
+    <!--  k:默认，代表默认排序，根据name
+          c:根据销量排序
+          p:根据价格排序-->
+
+    <select id="searchItemsByThirdCat" parameterType="Map" resultMap="searchItemsVO">
+        SELECT
+            i.id as itemId,
+            i.item_name as itemName,
+            i.sell_counts as sellCounts,
+            ii.url as imgUrl,
+            tempSpec.price_discount as price
+        FROM
+            items i
+        LEFT JOIN
+            items_img ii
+        ON
+            i.id = ii.item_id
+        LEFT JOIN
+        (
+        SELECT
+            item_id,
+            MIN(price_discount) as price_discount
+            from
+            items_spec
+        GROUP BY
+            item_id
+            ) tempSpec
+        on
+          i.id = tempSpec.item_id
+        WHERE
+        ii.is_main = 1
+        AND
+        i.cat_id = #{paramsMap.catId}
+        ORDER BY
+        <choose>
+            <when test="paramsMap.sort == &quot;c&quot;">
+                i.sell_counts DESC
+            </when>
+
+            <when test="paramsMap.sort ==  &quot;p&quot;">
+                tempSpec.price_discount ASC
+            </when>
+
+            <otherwise>
+                i.item_name ASC
+            </otherwise>
+        </choose>
+    </select>
 </mapper>
