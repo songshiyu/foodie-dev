@@ -41,4 +41,20 @@ public class ShopCatController {
 
         return ResultJSONResult.ok();
     }
+
+    @PostMapping("/del")
+    @ApiOperation(value = "从购物车中删除商品", notes = "从购物车中删除商品", httpMethod = "POST")
+    public ResultJSONResult del(
+            @RequestParam String userId,
+            @RequestParam String itemSpecId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        if (StringUtils.isBlank(userId) || StringUtils.isBlank(itemSpecId)) {
+            return ResultJSONResult.errorMsg("未选中商品");
+        }
+        logger.info("删除用户：{} 购物车中的商品：{}",userId,itemSpecId);
+        //TODO 前端用户在登录的情况下，删除购物车中商品，会同时同步删除对应的redis缓存
+        return ResultJSONResult.ok();
+    }
 }
