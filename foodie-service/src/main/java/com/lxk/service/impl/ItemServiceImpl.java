@@ -8,6 +8,7 @@ import com.lxk.pojo.*;
 import com.lxk.pojo.vo.CommentLevelCountsVO;
 import com.lxk.pojo.vo.ItemCommentsVO;
 import com.lxk.pojo.vo.SearchItemsVO;
+import com.lxk.pojo.vo.ShopcartVO;
 import com.lxk.service.ItemService;
 import com.lxk.utils.DesensitizationUtil;
 import com.lxk.utils.PagedGridResult;
@@ -17,9 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author songshiyu
@@ -131,7 +130,7 @@ public class ItemServiceImpl implements ItemService {
         PageHelper.startPage(page, pageSize);
         List<SearchItemsVO> list = itemsMapperCustom.searchItems(map);
 
-        return setterPagedgrid(list,page);
+        return setterPagedgrid(list, page);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -144,7 +143,18 @@ public class ItemServiceImpl implements ItemService {
         PageHelper.startPage(page, pageSize);
         List<SearchItemsVO> list = itemsMapperCustom.searchItemsByThirdCat(map);
 
-        return setterPagedgrid(list,page);
+        return setterPagedgrid(list, page);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<ShopcartVO> queryItemsBySpecIds(String specIds) {
+        String[] ids = specIds.split("\\,");
+        //List<String> specIdsList = Arrays.asList(ids);
+        List<String> specIdsList = new ArrayList<>();
+        Collections.addAll(specIdsList, ids);
+
+        return itemsMapperCustom.queryItemsBySpecIds(specIdsList);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
