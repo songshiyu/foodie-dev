@@ -2,7 +2,6 @@ package com.lxk.controller;
 
 import com.lxk.pojo.UserAddress;
 import com.lxk.pojo.bo.AddressBO;
-import com.lxk.pojo.vo.NewItemsVO;
 import com.lxk.service.AddressService;
 import com.lxk.utils.MobileEmailUtils;
 import com.lxk.utils.ResultJSONResult;
@@ -12,10 +11,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -31,10 +27,6 @@ public class AddressController {
     @Autowired
     private AddressService addressService;
 
-    /**
-     * 用户在确认订单页面，可以针对收货地址做如下操作：
-     * 5.设置默认地址
-     */
     @ApiOperation(value = "根据用户id查询收货地址列表", notes = "根据用户id查询收货地址列表", httpMethod = "POST")
     @PostMapping("/list")
     public ResultJSONResult sixNewItems(
