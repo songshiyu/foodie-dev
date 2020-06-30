@@ -176,9 +176,28 @@ public class ItemServiceImpl implements ItemService {
         return result != null ? result.getUrl() : "";
     }
 
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = {})
     @Override
     public void decreaseItemSpecStock(String specId, int buyCount) {
+        /**
+         * 线程安全：
+         *  1.synchronized 不推荐使用，集群下无用，性能低下
+         *  2.锁数据库：不推荐，导致数据库性能低下
+         *  3.分布式锁 zookeeper redis
+         * */
 
+        //1.TODO 查询库存,由于没有redis，暂时定为2
+        int stock = 2;
+
+        //2.判断库存，是否能够减少到0以下，此处会涉及到多线程问题，超卖
+        if (stock - buyCount < 0){
+            //提示用于库存不够
+            throw new RuntimeException("订单创建失败，原因：库存不足");
+        }
+        int result = itemsMapperCustom.decreaseItemSpecStock(specId, buyCount);
+        if (result != 1){
+            throw new RuntimeException("订单创建失败，原因：库存不足");
+        }
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)

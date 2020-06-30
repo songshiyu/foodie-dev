@@ -19,4 +19,9 @@ public class BaseController {
      * */
     public static final Integer PAGE_SIZE = 20;
 
+    /**
+     * 购物车
+     * */
+    public static final String FOODIE_SHOPCART = "shopcart";
+
 }

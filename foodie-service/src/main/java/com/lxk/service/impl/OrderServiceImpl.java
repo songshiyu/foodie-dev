@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
     @Override
-    public void createOrder(SubmitOrderBO submitOrderBO) {
+    public String createOrder(SubmitOrderBO submitOrderBO) {
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
         String itemSpecIds = submitOrderBO.getItemSpecIds();
@@ -106,9 +106,10 @@ public class OrderServiceImpl implements OrderService {
             orderItems.setBuyCounts(buyCounts);
             orderItems.setItemSpecId(itemSpecId);
             orderItems.setPrice(itemsSpec.getPriceDiscount());
+            orderItems.setItemSpecName(itemsSpec.getName());
             orderItemsMapper.insert(orderItems);
             //2.4 在用户提交订单以后，规格表中需要扣除库存
-
+            itemService.decreaseItemSpecStock(itemSpecId,buyCounts);
         }
 
         orders.setTotalAmount(totalAount);
@@ -122,5 +123,7 @@ public class OrderServiceImpl implements OrderService {
         waitpayOrderStatus.setCreatedTime(new Date());
 
         orderStatusMapper.insert(waitpayOrderStatus);
+
+        return orderId;
     }
 }
