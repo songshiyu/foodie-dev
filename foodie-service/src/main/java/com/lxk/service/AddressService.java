@@ -49,4 +49,12 @@ public interface AddressService {
      */
     public void setDefalutUserAddress(String userId, String addressId);
 
+    /**
+     * 根据用户id和地址id，查询具体的地址信息
+     * @param userId
+     * @param addressId
+     * @return
+     * */
+    public UserAddress queryUserAddress(String userId,String addressId);
+
 }

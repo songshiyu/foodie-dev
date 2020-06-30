@@ -3,6 +3,7 @@ package com.lxk.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lxk.enums.CommontLevel;
+import com.lxk.enums.YesOrNo;
 import com.lxk.mapper.*;
 import com.lxk.pojo.*;
 import com.lxk.pojo.vo.CommentLevelCountsVO;
@@ -155,6 +156,29 @@ public class ItemServiceImpl implements ItemService {
         Collections.addAll(specIdsList, ids);
 
         return itemsMapperCustom.queryItemsBySpecIds(specIdsList);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public ItemsSpec queryItemSpecById(String specId) {
+        return itemsSpecMapper.selectByPrimaryKey(specId);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public String queryItemMainImgById(String itemId) {
+        ItemsImg itemsImg = new ItemsImg();
+        itemsImg.setItemId(itemId);
+        itemsImg.setIsMain(YesOrNo.YES.type);
+
+        ItemsImg result = itemsImgMapper.selectOne(itemsImg);
+
+        return result != null ? result.getUrl() : "";
+    }
+
+    @Override
+    public void decreaseItemSpecStock(String specId, int buyCount) {
+
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)

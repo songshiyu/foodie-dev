@@ -1,6 +1,7 @@
 package com.lxk.controller;
 
 import com.lxk.pojo.bo.SubmitOrderBO;
+import com.lxk.enums.PayMethod;
 import com.lxk.utils.ResultJSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,6 +31,10 @@ public class OrdersController {
          * 3.向支付中心发送当前订单，用于保存支付中心的订单数据
          *
          * */
+        if(!submitOrderBO.getPayMethod().equals(PayMethod.WEIXIN.type)
+                && !submitOrderBO.getPayMethod().equals(PayMethod.WEIXIN.type)){
+            return ResultJSONResult.errorMsg("不支持的支付方式~");
+        }
         logger.info(submitOrderBO.toString());
         return ResultJSONResult.ok();
     }
