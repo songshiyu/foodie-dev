@@ -7,6 +7,8 @@ import com.lxk.mapper.OrderStatusMapper;
 import com.lxk.mapper.OrdersMapper;
 import com.lxk.pojo.*;
 import com.lxk.pojo.bo.SubmitOrderBO;
+import com.lxk.pojo.vo.MerchantOrdersVO;
+import com.lxk.pojo.vo.OrderVO;
 import com.lxk.service.AddressService;
 import com.lxk.service.ItemService;
 import com.lxk.service.OrderService;
@@ -46,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
     @Override
-    public String createOrder(SubmitOrderBO submitOrderBO) {
+    public OrderVO createOrder(SubmitOrderBO submitOrderBO) {
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
         String itemSpecIds = submitOrderBO.getItemSpecIds();
@@ -124,6 +126,28 @@ public class OrderServiceImpl implements OrderService {
 
         orderStatusMapper.insert(waitpayOrderStatus);
 
-        return orderId;
+        //4.构建商户订单，用于传给支付中心
+        MerchantOrdersVO merchantOrdersVO = new MerchantOrdersVO();
+        merchantOrdersVO.setMerchantOrderId(orderId);
+        merchantOrdersVO.setMerchantUserId(userId);
+        merchantOrdersVO.setAmount(realPayAmount + postAccount);
+        merchantOrdersVO.setPayMethod(payMethod);
+
+        //5.构建自定义订单
+        OrderVO orderVO = new OrderVO();
+        orderVO.setOrderId(orderId);
+        orderVO.setMerchantOrdersVO(merchantOrdersVO);
+        return orderVO;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = {})
+    @Override
+    public void updateOrderStatus(String orderId, Integer orderStatus) {
+        OrderStatus paidStatus = new OrderStatus();
+        paidStatus.setOrderId(orderId);
+        paidStatus.setOrderStatus(orderStatus);
+        paidStatus.setPayTime(new Date());
+
+        orderStatusMapper.updateByPrimaryKeySelective(paidStatus);
     }
 }
