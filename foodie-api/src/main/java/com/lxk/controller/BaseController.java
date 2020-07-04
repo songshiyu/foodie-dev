@@ -33,4 +33,9 @@ public class BaseController {
      * 支付中心的调用地址
      * */
     String paymentUrl = "http://payment.t.mukewang.com/foodie-payment/payment/createMerchantOrder";
+
+    /**
+     * 用户上传头像的位置
+     * */
+    public static final String IMAGE_USER_FACE_LOCATION = "E:\\工作软件\\data\\images\\foodie\\face";
 }
