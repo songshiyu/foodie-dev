@@ -6,6 +6,7 @@ import com.lxk.pojo.bo.center.CenterUserBO;
 import com.lxk.resource.FileUpload;
 import com.lxk.service.center.CenterUserService;
 import com.lxk.utils.CookieUtils;
+import com.lxk.utils.DateUtil;
 import com.lxk.utils.JsonUtils;
 import com.lxk.utils.ResultJSONResult;
 import io.swagger.annotations.Api;
@@ -78,7 +79,8 @@ public class CenterUserController extends BaseController {
             @ApiParam(name = "userId", value = "用户id", required = true)
             @RequestParam String userId,
             @ApiParam(name = "file", value = "用户头像", required = true)
-                    MultipartFile file
+                    MultipartFile file,
+            HttpServletRequest request,HttpServletResponse response
     ) {
         //定义头像保存的位置
         String fileSpace = fileUpload.getImageUserFaceLocation();
@@ -96,10 +98,18 @@ public class CenterUserController extends BaseController {
                     //获取文件的后缀
                     String suffix = splits[splits.length - 1];
 
+                    if (!suffix.equalsIgnoreCase("png") &&
+                            !suffix.equalsIgnoreCase("jpg")&&
+                            !suffix.equalsIgnoreCase("jpeg")){
+                        return ResultJSONResult.errorMsg("图片格式不正确");
+                    }
                     //文件名重组
                     String newFileName = "face-" + userId + "." + suffix;
                     //上传的头像最终的保存位置
                     String finalFacepath = fileSpace + uploadPathPrefix + File.separator + newFileName;
+
+                    //用于提供给web服务的访问地址
+                    uploadPathPrefix += ("/" + newFileName);
 
                     File outFile = new File(finalFacepath);
                     if (outFile.getParentFile() != null) {
@@ -126,6 +136,16 @@ public class CenterUserController extends BaseController {
             return ResultJSONResult.errorMsg("文件不能为空！");
         }
 
+        //图片服务的地址
+        String imageServiceUrl = fileUpload.getImageServiceUrl();
+        //由于浏览器可能存在缓存，所以在这里，我们要加上时间戳来保证更新后的图片可以及时的在页面显示
+        String finalUserFaceUrl = imageServiceUrl + uploadPathPrefix + "?t=" + DateUtil.getCurrentDateString(DateUtil.DATE_PATTERN);
+        //更新用户头像到数据库
+        Users userResult = centerUserService.updataUserFace(userId, finalUserFaceUrl);
+
+        //TODO 后续要改，增加令牌token，会整合进redis，分布式会话
+        //设置cookie
+        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(userResult), true);
         return ResultJSONResult.ok();
     }
 
