@@ -36,7 +36,7 @@ public class OrderJob {
      *  后续加入消息队列：MQ ==》延时队列
      * */
     /*@Scheduled(cron = "0/3 * * * * ?")*/
-    @Scheduled(cron = "0 0 0/1 0 0 ?")
+    @Scheduled(cron = "0 0 0/1 * * * ")
     public void autoCloseOrder(){
         orderService.closeOrder();
     }
