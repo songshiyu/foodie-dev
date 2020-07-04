@@ -12,6 +12,7 @@ import com.lxk.pojo.vo.OrderVO;
 import com.lxk.service.AddressService;
 import com.lxk.service.ItemService;
 import com.lxk.service.OrderService;
+import com.lxk.utils.DateUtil;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author songshiyu
@@ -86,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
         Integer totalAount = 0;
         //优惠后的实际支付价格累计
         Integer realPayAmount = 0;
-        for (String itemSpecId:itemSpecIdArr){
+        for (String itemSpecId : itemSpecIdArr) {
             //2.1 根据规格id，查询商品信息
             ItemsSpec itemsSpec = itemService.queryItemSpecById(itemSpecId);
             //TODO 整合redis后，商品购买的数量重新从redis中获取,此处暂定购买数量为1
@@ -111,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
             orderItems.setItemSpecName(itemsSpec.getName());
             orderItemsMapper.insert(orderItems);
             //2.4 在用户提交订单以后，规格表中需要扣除库存
-            itemService.decreaseItemSpecStock(itemSpecId,buyCounts);
+            itemService.decreaseItemSpecStock(itemSpecId, buyCounts);
         }
 
         orders.setTotalAmount(totalAount);
@@ -140,7 +142,7 @@ public class OrderServiceImpl implements OrderService {
         return orderVO;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = {})
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
     @Override
     public void updateOrderStatus(String orderId, Integer orderStatus) {
         OrderStatus paidStatus = new OrderStatus();
@@ -149,5 +151,41 @@ public class OrderServiceImpl implements OrderService {
         paidStatus.setPayTime(new Date());
 
         orderStatusMapper.updateByPrimaryKeySelective(paidStatus);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public OrderStatus queryOrderStatusInfo(String orderId) {
+        return orderStatusMapper.selectByPrimaryKey(orderId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
+    @Override
+    public void closeOrder() {
+        //查询所有未付款订单，判断时间是否超时（1天）
+        OrderStatus orderStatus = new OrderStatus();
+        orderStatus.setOrderStatus(OrderStatusEnum.WAIT_PAY.type);
+
+        List<OrderStatus> list = orderStatusMapper.select(orderStatus);
+        for (OrderStatus o : list) {
+            //获得订单创建时间
+            Date createdTime = o.getCreatedTime();
+            //和当前时间进行对比
+            int days = DateUtil.daysBetween(createdTime, new Date());
+            if (days >= 1) {
+                //超过一天，关闭订单
+                doCloseOrder(o.getOrderId());
+            }
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = {})
+    void doCloseOrder(String orderId){
+        OrderStatus close = new OrderStatus();
+        close.setOrderId(orderId);
+        close.setOrderStatus(OrderStatusEnum.CLOSE.type);
+        close.setCloseTime(new Date());
+
+        orderStatusMapper.updateByPrimaryKeySelective(close);
     }
 }

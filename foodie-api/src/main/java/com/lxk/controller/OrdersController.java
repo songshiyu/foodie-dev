@@ -1,6 +1,7 @@
 package com.lxk.controller;
 
 import com.lxk.enums.OrderStatusEnum;
+import com.lxk.pojo.OrderStatus;
 import com.lxk.pojo.bo.SubmitOrderBO;
 import com.lxk.enums.PayMethod;
 import com.lxk.pojo.vo.MerchantOrdersVO;
@@ -46,7 +47,7 @@ public class OrdersController extends BaseController {
                                    HttpServletResponse response) {
         //1.创建订单
         if (!submitOrderBO.getPayMethod().equals(PayMethod.WEIXIN.type)
-                || !submitOrderBO.getPayMethod().equals(PayMethod.ALIPAY.type)) {
+                && !submitOrderBO.getPayMethod().equals(PayMethod.ALIPAY.type)) {
             return ResultJSONResult.errorMsg("不支持的支付方式~");
         }
         logger.info(submitOrderBO.toString());
@@ -65,8 +66,8 @@ public class OrdersController extends BaseController {
         //构建HttpHeader
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        httpHeaders.add("'imoocUserId'",null);
-        httpHeaders.add("password",null);
+        httpHeaders.add("imoocUserId","3372580-752164156");
+        httpHeaders.add("password","rr4i-290i-ir09-23i9");
 
         HttpEntity<MerchantOrdersVO> entity = new HttpEntity<>(merchantOrdersVO,httpHeaders);
         ResponseEntity<ResultJSONResult> responseEntity =
@@ -87,6 +88,13 @@ public class OrdersController extends BaseController {
     public Integer notifyMerchantOrderPaid(String merchantOrderId) {
         orderService.updateOrderStatus(merchantOrderId, OrderStatusEnum.WAIT_DELIVER.type);
         return HttpStatus.OK.value();
+    }
+
+    @ApiOperation(value = "轮询查询订单状态", notes = "轮询查询订单状态", httpMethod = "POST")
+    @PostMapping("getPaidOrderInfo")
+    public ResultJSONResult getPaidOrderInfo(@RequestParam String orderId){
+        OrderStatus orderStatus = orderService.queryOrderStatusInfo(orderId);
+        return ResultJSONResult.ok(orderStatus);
     }
 
 }
