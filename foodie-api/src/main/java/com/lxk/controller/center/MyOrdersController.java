@@ -128,15 +128,4 @@ public class MyOrdersController extends BaseController {
 
         return ResultJSONResult.ok();
     }
-
-    /**
-     * 用户验证用户与订单是否有管理关系，防止非法用户调用
-     */
-    private ResultJSONResult checkUserOrder(String userId, String orderId) {
-        Orders orders = myOrdersService.queryMyOrder(userId, orderId);
-        if (orders == null) {
-            return ResultJSONResult.errorMsg("订单不存在！");
-        }
-        return ResultJSONResult.ok();
-    }
 }
