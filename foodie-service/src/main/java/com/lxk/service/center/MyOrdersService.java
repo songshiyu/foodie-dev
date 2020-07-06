@@ -1,6 +1,7 @@
 package com.lxk.service.center;
 
 import com.lxk.pojo.Orders;
+import com.lxk.pojo.vo.OrderStatusCountsVO;
 import com.lxk.utils.PagedGridResult;
 
 /**
@@ -46,4 +47,17 @@ public interface MyOrdersService {
      * @param orderId
      * */
     public boolean deleteOrder(String userId,String orderId);
+
+
+    /**
+     * 根据用户id查询订单数
+     * @param userId
+     * */
+    public OrderStatusCountsVO getOrderStatusCounts(String userId);
+
+    /**
+     * 获得分页的订单动向
+     * @param userId
+     * */
+    public PagedGridResult getMyOrderTrend(String userId,Integer page,Integer pageSize);
 }

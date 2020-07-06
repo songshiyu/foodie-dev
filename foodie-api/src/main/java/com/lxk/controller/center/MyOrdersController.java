@@ -4,6 +4,7 @@ import com.lxk.controller.BaseController;
 import com.lxk.pojo.Orders;
 import com.lxk.pojo.Users;
 import com.lxk.pojo.bo.center.CenterUserBO;
+import com.lxk.pojo.vo.OrderStatusCountsVO;
 import com.lxk.resource.FileUpload;
 import com.lxk.service.center.CenterUserService;
 import com.lxk.service.center.MyOrdersService;
@@ -42,6 +43,19 @@ public class MyOrdersController extends BaseController {
 
     @Autowired
     private MyOrdersService myOrdersService;
+
+    @ApiOperation(value = "获得订单状态数概况", notes = "获得订单状态数概况", httpMethod = "POST")
+    @PostMapping("/statusCounts")
+    public ResultJSONResult statusCounts(
+            @ApiParam(name = "userId", value = "用户id", required = true)
+            @RequestParam String userId) {
+
+        if (StringUtils.isBlank(userId)) {
+            return ResultJSONResult.errorMsg(null);
+        }
+        OrderStatusCountsVO result = myOrdersService.getOrderStatusCounts(userId);
+        return ResultJSONResult.ok(result);
+    }
 
     @ApiOperation(value = "查询订单列表", notes = "查询订单列表", httpMethod = "POST")
     @PostMapping("/query")
@@ -122,10 +136,35 @@ public class MyOrdersController extends BaseController {
         }
 
         boolean result = myOrdersService.deleteOrder(userId, orderId);
-        if (!result){
+        if (!result) {
             return ResultJSONResult.errorMsg("订单删除失败！");
         }
 
         return ResultJSONResult.ok();
+    }
+
+    @ApiOperation(value = "查询订单动向", notes = "查询订单动向", httpMethod = "POST")
+    @PostMapping("/trend")
+    public ResultJSONResult trend(
+            @ApiParam(name = "userId", value = "用户id", required = true)
+            @RequestParam String userId,
+            @ApiParam(name = "page", value = "查询第几页", required = false)
+            @RequestParam Integer page,
+            @ApiParam(name = "pageSize", value = "每页几条", required = false)
+            @RequestParam Integer pageSize) {
+
+        if (StringUtils.isBlank(userId)) {
+            return ResultJSONResult.errorMsg(null);
+        }
+
+        if (page == null) {
+            page = 0;
+        }
+
+        if (pageSize == null) {
+            pageSize = COMMON_PAGE_SIZE;
+        }
+        PagedGridResult orderTrend = myOrdersService.getMyOrderTrend(userId, page, pageSize);
+        return ResultJSONResult.ok(orderTrend);
     }
 }
