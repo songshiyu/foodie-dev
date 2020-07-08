@@ -47,6 +47,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <!-- 若要使用自己的tomcat，那么需要移除springboot的tomcat-->
+            <exclusions>
+                <exclusion>
+                    <groupId>spring-boot-starter-tomcat</groupId>
+                    <artifactId>org.spring.boot</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -138,6 +145,12 @@
             <version>1.7.21</version>
         </dependency>
 
+        <!-- 将springboot项目打包成war包时，需要手动引入servlet的依赖-->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 

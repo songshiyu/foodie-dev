@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="foodie-dev:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="foodie-dev-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="foodie-dev:war exploded" />
+    </root>
+  </artifact>
+</component>

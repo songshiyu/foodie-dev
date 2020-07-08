@@ -33,9 +33,9 @@ public class BaseController {
     public static final String FOODIE_SHOPCART = "shopcart";
 
     /**
-     * 微信支付成功 -》支付中心 -》 天天吃货平台 -》回调通知的url
+     * 微信支付成功 -》支付中心 -》 天天吃货平台 -》回调通知的url（我此处的url是不可用的）
      * */
-    String payReturnUrl = "localhost:8088/orders/notifyMerchantOrderPaid";
+    String payReturnUrl = "http://192.168.137.10:8088/foodie-dev-api/orders/notifyMerchantOrderPaid";
 
     /**
      * 支付中心的调用地址
