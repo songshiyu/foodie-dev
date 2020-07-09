@@ -24,7 +24,8 @@ public class CoresConfig {
     public CorsFilter corsFilter(){
         //1.添加cors配置信息
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("*");
+
         //设置是否发送cookie信息
         config.setAllowCredentials(true);
         //设置允许的请求方式
@@ -44,3 +45,4 @@ public class CoresConfig {
 
 
 }
+
