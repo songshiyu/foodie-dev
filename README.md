@@ -45,7 +45,7 @@ MariaDB 10.4.x
       赋予root用户远程连接权限：
         grant all privileges on *.* to 'root'@'%' identified by 'root密码';
         flush privileges;
-
+ 
 
 架构师进阶之-集群项目架构
 
