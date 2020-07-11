@@ -46,8 +46,35 @@ MariaDB 10.4.x
         grant all privileges on *.* to 'root'@'%' identified by 'root密码';
         flush privileges;
  
-
 架构师进阶之-集群项目架构
+  1.Nginx为静态资源提供服务
+    server {
+        listen       89;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  immoc.html index.htm;
+        }
+    }
+
+    server {
+        listen       90;
+        server_name  localhost;
+
+        location / {
+            root   /home/foodie-shop;
+            index  index.html;
+        }
+
+        #功能同下location,使用location更为安全
+        location /static {
+            alias   /home/immoc;
+        }
+
+        location /immoc {
+            root   /home;
+        }
 
 
 架构师进阶之-分布式架构
