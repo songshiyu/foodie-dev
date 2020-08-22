@@ -1,5 +1,6 @@
 package com.lxk.controller;
 
+import com.lxk.utils.RedisOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,23 +18,23 @@ import springfox.documentation.annotations.ApiIgnore;
 public class RedisController {
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisOperator redisOperator;
 
     @GetMapping("/set")
     public String set(String key,String value) {
-        redisTemplate.opsForValue().set(key, value);
+        redisOperator.set(key,value);
         return "ok";
     }
 
     @GetMapping("/get")
     public String get(String key) {
-        String value = (String) redisTemplate.opsForValue().get(key);
+        String value = redisOperator.get(key);
         return value;
     }
 
     @GetMapping("/delete")
     public String delete(String key) {
-        Boolean isDel = redisTemplate.delete(key);
-        return isDel.toString();
+        redisOperator.del(key);
+        return "ok";
     }
 }
