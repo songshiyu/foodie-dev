@@ -6,6 +6,7 @@ import com.lxk.mapper.OrderItemsMapper;
 import com.lxk.mapper.OrderStatusMapper;
 import com.lxk.mapper.OrdersMapper;
 import com.lxk.pojo.*;
+import com.lxk.pojo.bo.ShopcartBo;
 import com.lxk.pojo.bo.SubmitOrderBO;
 import com.lxk.pojo.vo.MerchantOrdersVO;
 import com.lxk.pojo.vo.OrderVO;
@@ -50,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
     @Override
-    public OrderVO createOrder(SubmitOrderBO submitOrderBO) {
+    public OrderVO createOrder(SubmitOrderBO submitOrderBO, List<ShopcartBo> shopcartBoList) {
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
         String itemSpecIds = submitOrderBO.getItemSpecIds();
@@ -91,29 +92,32 @@ public class OrderServiceImpl implements OrderService {
         for (String itemSpecId : itemSpecIdArr) {
             //2.1 根据规格id，查询商品信息
             ItemsSpec itemsSpec = itemService.queryItemSpecById(itemSpecId);
-            //TODO 整合redis后，商品购买的数量重新从redis中获取,此处暂定购买数量为1
-            Integer buyCounts = 1;
-            totalAount += itemsSpec.getPriceNormal() * buyCounts;
-            realPayAmount += itemsSpec.getPriceDiscount() * buyCounts;
-            //2.2 根据商品id，获得商品信息以及商品图片
-            String itemId = itemsSpec.getItemId();
-            Items items = itemService.queryItemById(itemId);
-            String imgUrl = itemService.queryItemMainImgById(itemId);
-            //2.3 循环保存子订单数据到数据库
-            String orderItemId = sid.nextShort();
-            OrderItems orderItems = new OrderItems();
-            orderItems.setId(orderItemId);
-            orderItems.setOrderId(orderId);
-            orderItems.setItemId(itemId);
-            orderItems.setItemName(items.getItemName());
-            orderItems.setItemImg(imgUrl);
-            orderItems.setBuyCounts(buyCounts);
-            orderItems.setItemSpecId(itemSpecId);
-            orderItems.setPrice(itemsSpec.getPriceDiscount());
-            orderItems.setItemSpecName(itemsSpec.getName());
-            orderItemsMapper.insert(orderItems);
-            //2.4 在用户提交订单以后，规格表中需要扣除库存
-            itemService.decreaseItemSpecStock(itemSpecId, buyCounts);
+            ShopcartBo shopcart = getBuyCountsFromShopcart(shopcartBoList, itemSpecId);
+            if (shopcart != null) {
+                //整商品购买的数量重新从redis中获取
+                Integer buyCounts = shopcart.getBuyCounts();
+                totalAount += itemsSpec.getPriceNormal() * buyCounts;
+                realPayAmount += itemsSpec.getPriceDiscount() * buyCounts;
+                //2.2 根据商品id，获得商品信息以及商品图片
+                String itemId = itemsSpec.getItemId();
+                Items items = itemService.queryItemById(itemId);
+                String imgUrl = itemService.queryItemMainImgById(itemId);
+                //2.3 循环保存子订单数据到数据库
+                String orderItemId = sid.nextShort();
+                OrderItems orderItems = new OrderItems();
+                orderItems.setId(orderItemId);
+                orderItems.setOrderId(orderId);
+                orderItems.setItemId(itemId);
+                orderItems.setItemName(items.getItemName());
+                orderItems.setItemImg(imgUrl);
+                orderItems.setBuyCounts(buyCounts);
+                orderItems.setItemSpecId(itemSpecId);
+                orderItems.setPrice(itemsSpec.getPriceDiscount());
+                orderItems.setItemSpecName(itemsSpec.getName());
+                orderItemsMapper.insert(orderItems);
+                //2.4 在用户提交订单以后，规格表中需要扣除库存
+                itemService.decreaseItemSpecStock(itemSpecId, buyCounts);
+            }
         }
 
         orders.setTotalAmount(totalAount);
@@ -179,13 +183,30 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = {})
-    void doCloseOrder(String orderId){
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
+    void doCloseOrder(String orderId) {
         OrderStatus close = new OrderStatus();
         close.setOrderId(orderId);
         close.setOrderStatus(OrderStatusEnum.CLOSE.type);
         close.setCloseTime(new Date());
 
         orderStatusMapper.updateByPrimaryKeySelective(close);
+    }
+
+
+    /**
+     * 从redis中的购物车里获取商品，目的：counts
+     *
+     * @param shopcartList
+     * @param specId
+     * @return
+     */
+    private ShopcartBo getBuyCountsFromShopcart(List<ShopcartBo> shopcartList, String specId) {
+        for (ShopcartBo sc : shopcartList) {
+            if (specId.equals(sc.getSpecId())) {
+                return sc;
+            }
+        }
+        return null;
     }
 }
