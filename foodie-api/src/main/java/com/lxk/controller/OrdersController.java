@@ -2,15 +2,19 @@ package com.lxk.controller;
 
 import com.lxk.enums.OrderStatusEnum;
 import com.lxk.pojo.OrderStatus;
+import com.lxk.pojo.bo.ShopcartBo;
 import com.lxk.pojo.bo.SubmitOrderBO;
 import com.lxk.enums.PayMethod;
 import com.lxk.pojo.vo.MerchantOrdersVO;
 import com.lxk.pojo.vo.OrderVO;
 import com.lxk.service.OrderService;
 import com.lxk.utils.CookieUtils;
+import com.lxk.utils.JsonUtils;
+import com.lxk.utils.RedisOperator;
 import com.lxk.utils.ResultJSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 
 /**
@@ -40,6 +45,9 @@ public class OrdersController extends BaseController {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private RedisOperator redisOperator;
+
     @ApiOperation(value = "用户下单", notes = "用户下单", httpMethod = "POST")
     @PostMapping("/create")
     public ResultJSONResult create(@RequestBody SubmitOrderBO submitOrderBO,
@@ -51,11 +59,24 @@ public class OrdersController extends BaseController {
             return ResultJSONResult.errorMsg("不支持的支付方式~");
         }
         logger.info(submitOrderBO.toString());
-        OrderVO orderVO = orderService.createOrder(submitOrderBO);
+
+        String shopcatJson = redisOperator.get(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId());
+
+        if (StringUtils.isBlank(shopcatJson)) {
+            return ResultJSONResult.errorMsg("订单异常！");
+        }
+
+        List<ShopcartBo> shopcartBoList = JsonUtils.jsonToList(shopcatJson, ShopcartBo.class);
+
+        OrderVO orderVO = orderService.createOrder(submitOrderBO, shopcartBoList);
 
         //2.创建订单以后，移除购物车中已结算(已提交)的商品
-        //TODO 整合redis后，完善购物车中的已结算商品清除，并且同步到前端的cookie
-        CookieUtils.setCookie(request, response, FOODIE_SHOPCART, "", true);
+        //完善购物车中的已结算商品清除，并且同步到前端的cookie与redis
+        List<ShopcartBo> tobeRemoveList = orderVO.getTobeRemoveList();
+        shopcartBoList.removeAll(tobeRemoveList);
+
+        redisOperator.set(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId(), JsonUtils.objectToJson(shopcartBoList));
+        CookieUtils.setCookie(request, response, FOODIE_SHOPCART, JsonUtils.objectToJson(shopcartBoList), true);
 
         // 3.向支付中心发送当前订单，用于保存支付中心的订单数据
         MerchantOrdersVO merchantOrdersVO = orderVO.getMerchantOrdersVO();
@@ -66,15 +87,15 @@ public class OrdersController extends BaseController {
         //构建HttpHeader
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        httpHeaders.add("imoocUserId","3372580-752164156");
-        httpHeaders.add("password","rr4i-290i-ir09-23i9");
+        httpHeaders.add("imoocUserId", "3372580-752164156");
+        httpHeaders.add("password", "rr4i-290i-ir09-23i9");
 
-        HttpEntity<MerchantOrdersVO> entity = new HttpEntity<>(merchantOrdersVO,httpHeaders);
+        HttpEntity<MerchantOrdersVO> entity = new HttpEntity<>(merchantOrdersVO, httpHeaders);
         ResponseEntity<ResultJSONResult> responseEntity =
                 restTemplate.postForEntity(paymentUrl, entity, ResultJSONResult.class);
 
         ResultJSONResult paymentResult = responseEntity.getBody();
-        if (paymentResult.getStatus() != HttpStatus.OK.value()){
+        if (paymentResult.getStatus() != HttpStatus.OK.value()) {
             return ResultJSONResult.errorMsg("支付中心订单创建失败，请联系管理员");
         }
 
@@ -92,7 +113,7 @@ public class OrdersController extends BaseController {
 
     @ApiOperation(value = "轮询查询订单状态", notes = "轮询查询订单状态", httpMethod = "POST")
     @PostMapping("getPaidOrderInfo")
-    public ResultJSONResult getPaidOrderInfo(@RequestParam String orderId){
+    public ResultJSONResult getPaidOrderInfo(@RequestParam String orderId) {
         OrderStatus orderStatus = orderService.queryOrderStatusInfo(orderId);
         return ResultJSONResult.ok(orderStatus);
     }

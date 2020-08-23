@@ -1,8 +1,11 @@
 package com.lxk.service;
 
 import com.lxk.pojo.OrderStatus;
+import com.lxk.pojo.bo.ShopcartBo;
 import com.lxk.pojo.bo.SubmitOrderBO;
 import com.lxk.pojo.vo.OrderVO;
+
+import java.util.List;
 
 /**
  * @author songshiyu
@@ -13,7 +16,7 @@ public interface OrderService {
     /**
      * 用于创建订单
      * */
-    public OrderVO createOrder(SubmitOrderBO submitOrderBO);
+    public OrderVO createOrder(SubmitOrderBO submitOrderBO,List<ShopcartBo> shopcartBoList);
 
 
     /**

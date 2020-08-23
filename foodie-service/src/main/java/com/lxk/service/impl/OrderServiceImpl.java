@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -89,6 +90,7 @@ public class OrderServiceImpl implements OrderService {
         Integer totalAount = 0;
         //优惠后的实际支付价格累计
         Integer realPayAmount = 0;
+        List<ShopcartBo> tobeRemoveList = new ArrayList<>();
         for (String itemSpecId : itemSpecIdArr) {
             //2.1 根据规格id，查询商品信息
             ItemsSpec itemsSpec = itemService.queryItemSpecById(itemSpecId);
@@ -96,6 +98,8 @@ public class OrderServiceImpl implements OrderService {
             if (shopcart != null) {
                 //整商品购买的数量重新从redis中获取
                 Integer buyCounts = shopcart.getBuyCounts();
+                tobeRemoveList.add(shopcart);
+
                 totalAount += itemsSpec.getPriceNormal() * buyCounts;
                 realPayAmount += itemsSpec.getPriceDiscount() * buyCounts;
                 //2.2 根据商品id，获得商品信息以及商品图片
@@ -143,6 +147,7 @@ public class OrderServiceImpl implements OrderService {
         OrderVO orderVO = new OrderVO();
         orderVO.setOrderId(orderId);
         orderVO.setMerchantOrdersVO(merchantOrdersVO);
+        orderVO.setTobeRemoveList(tobeRemoveList);
         return orderVO;
     }
 
