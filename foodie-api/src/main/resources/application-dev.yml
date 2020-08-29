@@ -6,10 +6,22 @@ spring:
     url: jdbc:mysql://localhost:3306/foodie-shop?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
     password: root
   redis:
+    #redis哨兵模式
     database: 1
-    host: 192.168.137.10
-    port: 6379
     password: lxk4dhr
+    sentinel:
+      master: lxk-master
+      nodes: 192.168.137.14:26379,192.168.137.15:26379,192.168.137.16:26379
+    #redis单实例
+#    database: 1
+#    host: 192.168.137.10
+#    port: 6379
+#    password: lxk4dhr
+    #集群模式
+     #password: lxk4dhr
+     #cluster:
+        #nodes:192.168.137.x:6379,192.168.137.x:6379,192.168.137.x:6379,192.168.137.x:6379,192.168.137.x:6379,192.168.137.x:6379,
+
 
 ##############################################################################
 #
