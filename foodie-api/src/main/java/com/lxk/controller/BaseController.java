@@ -1,10 +1,16 @@
 package com.lxk.controller;
 
 import com.lxk.pojo.Orders;
+import com.lxk.pojo.Users;
+import com.lxk.pojo.vo.UsersVO;
 import com.lxk.service.center.MyOrdersService;
+import com.lxk.utils.RedisOperator;
 import com.lxk.utils.ResultJSONResult;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.util.UUID;
 
 /**
  * @author songshiyu
@@ -16,6 +22,8 @@ public class BaseController {
     @Autowired
     private MyOrdersService myOrdersService;
 
+    @Autowired
+    private RedisOperator redisOperator;
 
     /**
      * 评论默认的分页每页条数
@@ -62,5 +70,15 @@ public class BaseController {
             return ResultJSONResult.errorMsg("订单不存在！");
         }
         return ResultJSONResult.ok(orders);
+    }
+
+    public UsersVO convertUserVo(Users usersResult) {
+        String uniqueToken = UUID.randomUUID().toString().trim();
+        redisOperator.set(USER_REDIS_TOKEN + ":" + usersResult.getId(), uniqueToken);
+
+        UsersVO usersVO = new UsersVO();
+        BeanUtils.copyProperties(usersResult, usersVO);
+        usersVO.setUserUniqueToken(uniqueToken);
+        return usersVO;
     }
 }

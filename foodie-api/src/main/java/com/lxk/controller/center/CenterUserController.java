@@ -3,6 +3,7 @@ package com.lxk.controller.center;
 import com.lxk.controller.BaseController;
 import com.lxk.pojo.Users;
 import com.lxk.pojo.bo.center.CenterUserBO;
+import com.lxk.pojo.vo.UsersVO;
 import com.lxk.resource.FileUpload;
 import com.lxk.service.center.CenterUserService;
 import com.lxk.utils.CookieUtils;
@@ -64,11 +65,11 @@ public class CenterUserController extends BaseController {
         }
 
         Users userResult = centerUserService.updateUserInfo(userId, centerUserBO);
-        userResult = setNullProperty(userResult);
+        //增加令牌token，会整合进redis，分布式会话
+        UsersVO usersVO = convertUserVo(userResult);
 
-        //TODO 后续要改，增加令牌token，会整合进redis，分布式会话
         //设置cookie
-        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(userResult), true);
+        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersVO), true);
         return ResultJSONResult.ok();
     }
 
@@ -80,7 +81,7 @@ public class CenterUserController extends BaseController {
             @RequestParam String userId,
             @ApiParam(name = "file", value = "用户头像", required = true)
                     MultipartFile file,
-            HttpServletRequest request,HttpServletResponse response
+            HttpServletRequest request, HttpServletResponse response
     ) {
         //定义头像保存的位置
         String fileSpace = fileUpload.getImageUserFaceLocation();
@@ -99,8 +100,8 @@ public class CenterUserController extends BaseController {
                     String suffix = splits[splits.length - 1];
 
                     if (!suffix.equalsIgnoreCase("png") &&
-                            !suffix.equalsIgnoreCase("jpg")&&
-                            !suffix.equalsIgnoreCase("jpeg")){
+                            !suffix.equalsIgnoreCase("jpg") &&
+                            !suffix.equalsIgnoreCase("jpeg")) {
                         return ResultJSONResult.errorMsg("图片格式不正确");
                     }
                     //文件名重组
@@ -143,9 +144,11 @@ public class CenterUserController extends BaseController {
         //更新用户头像到数据库
         Users userResult = centerUserService.updataUserFace(userId, finalUserFaceUrl);
 
-        //TODO 后续要改，增加令牌token，会整合进redis，分布式会话
+        //增加令牌token，会整合进redis，分布式会话
+        UsersVO usersVO = convertUserVo(userResult);
+
         //设置cookie
-        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(userResult), true);
+        CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersVO), true);
         return ResultJSONResult.ok();
     }
 

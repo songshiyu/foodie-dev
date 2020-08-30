@@ -78,7 +78,7 @@ public class PassportController extends BaseController {
         }
 
         //设置用户token，存入redis
-        UsersVO usersVO = convertUserVo(redisOperator, usersResult);
+        UsersVO usersVO = convertUserVo(usersResult);
 
         //设置cookie
         CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersVO), true);
@@ -199,7 +199,7 @@ public class PassportController extends BaseController {
         Users usersResult = userService.createUser(userBO);
 
         //设置用户token，存入redis
-        UsersVO usersVO = convertUserVo(redisOperator, usersResult);
+        UsersVO usersVO = convertUserVo(usersResult);
         //设置cookie
         CookieUtils.setCookie(request, response, "user", JsonUtils.objectToJson(usersVO), true);
         //同步购物车数据
@@ -225,15 +225,4 @@ public class PassportController extends BaseController {
 
         return ResultJSONResult.ok();
     }
-
-    private static UsersVO convertUserVo(RedisOperator redisOperator, Users usersResult) {
-        String uniqueToken = UUID.randomUUID().toString().trim();
-        redisOperator.set(USER_REDIS_TOKEN + ":" + usersResult.getId(), uniqueToken);
-
-        UsersVO usersVO = new UsersVO();
-        BeanUtils.copyProperties(usersResult, usersVO);
-        usersVO.setUserUniqueToken(uniqueToken);
-        return usersVO;
-    }
-
 }
