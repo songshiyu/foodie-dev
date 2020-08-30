@@ -95,8 +95,27 @@ public class IndexController {
         if (rootCatId == null) {
             return ResultJSONResult.errorMsg("分类不存在");
         }
+        List<CategoryVO> subCatLIst = null;
+        String catsStr = redisOperator.get("subCat:" + rootCatId);
+        if (StringUtils.isBlank(catsStr)) {
+            subCatLIst = categoryService.getSubCatLIst(rootCatId);
 
-        List<CategoryVO> subCatLIst = categoryService.getSubCatLIst(rootCatId);
+            /**
+             * 解决redis缓存穿透的一种方式：
+             *  查询的key在redis不存在，对应的id在数据库也不存在，此时被非法用户进行攻击
+             *  此时大量的非法请求会直接打在数据库上，可能会造成数据库的宕机，从而影响整个系统。
+             *  这种现象被称为缓存穿透。
+             *  解决方案：
+             *      把空的字符串也缓存起来。
+             * */
+            if (subCatLIst == null || subCatLIst.size() == 0) {
+                redisOperator.set("subCat" + rootCatId, JsonUtils.objectToJson(subCatLIst), 5 * 60);
+            } else {
+                redisOperator.set("subCat" + rootCatId, JsonUtils.objectToJson(subCatLIst));
+            }
+        } else {
+            subCatLIst = JsonUtils.jsonToList(catsStr, CategoryVO.class);
+        }
         return ResultJSONResult.ok(subCatLIst);
     }
 
