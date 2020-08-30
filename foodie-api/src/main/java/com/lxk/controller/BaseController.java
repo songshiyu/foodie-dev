@@ -49,6 +49,11 @@ public class BaseController {
 
 
     /**
+     * redis用户token
+     * */
+    public static final String USER_REDIS_TOKEN = "user_redis_token";
+
+    /**
      * 用户验证用户与订单是否有管理关系，防止非法用户调用
      */
     public ResultJSONResult checkUserOrder(String userId, String orderId) {
