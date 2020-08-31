@@ -19,6 +19,12 @@
           <element id="archive" name="foodie-common-1.0-SNAPSHOT.jar">
             <element id="module-output" name="foodie-common" />
           </element>
+          <element id="library" level="project" name="Maven: org.springframework.session:spring-session-data-redis:2.1.6.RELEASE" />
+          <element id="library" level="project" name="Maven: org.springframework.session:spring-session-core:2.1.6.RELEASE" />
+          <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter-security:2.1.5.RELEASE" />
+          <element id="library" level="project" name="Maven: org.springframework.security:spring-security-config:5.1.5.RELEASE" />
+          <element id="library" level="project" name="Maven: org.springframework.security:spring-security-core:5.1.5.RELEASE" />
+          <element id="library" level="project" name="Maven: org.springframework.security:spring-security-web:5.1.5.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-core:5.1.7.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-jcl:5.1.7.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-starter:2.1.5.RELEASE" />

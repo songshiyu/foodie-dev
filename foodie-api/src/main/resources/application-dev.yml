@@ -17,6 +17,9 @@ spring:
      host: 192.168.137.10
      port: 6379
      password: lxk4dhr
+  #使用redis来存储spring session
+  #session:
+    #store-type: redis
     #集群模式
      #password: lxk4dhr
      #cluster:
