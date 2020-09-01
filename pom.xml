@@ -14,6 +14,7 @@
         <module>foodie-mapper</module>
         <module>foodie-service</module>
         <module>foodie-api</module>
+        <module>foodie-sso</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -94,10 +95,10 @@
         </dependency>
 
         <!-- 引入spring-session依赖 -->
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- redis -->
         <dependency>
@@ -106,10 +107,10 @@
         </dependency>
 
         <!-- spring自带的安全框架 -->
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- apache工具类 -->
         <dependency>

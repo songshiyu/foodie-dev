@@ -11,6 +11,7 @@
         <module name="foodie-mapper" />
         <module name="foodie-pojo" />
         <module name="foodie-service" />
+        <module name="foodie-sso" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -20,6 +21,7 @@
       <module name="foodie-mapper" target="1.8" />
       <module name="foodie-pojo" target="1.8" />
       <module name="foodie-service" target="1.8" />
+      <module name="foodie-sso" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
