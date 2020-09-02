@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *                 502： 拦截器拦截到用户token出错
  *                 555： 抛出异常信息
  *                 556： 用户qq校验异常
+ *                 557:  校验用户是否在CAS端登录
  **/
 public class ResultJSONResult {
 
@@ -95,6 +96,9 @@ public class ResultJSONResult {
         return new ResultJSONResult(556, msg, null);
     }
 
+    public static ResultJSONResult errorUserTicket(String msg) {
+        return new ResultJSONResult(557, msg, null);
+    }
 
     public static ObjectMapper getMAPPER() {
         return MAPPER;
