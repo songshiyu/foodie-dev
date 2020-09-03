@@ -211,4 +211,33 @@ public class SSOController {
         }
         return tmpTicket;
     }
+
+    @PostMapping("/logout")
+    @ResponseBody
+    public ResultJSONResult logout(String userId,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception {
+
+        // 0. 获取CAS中的用户门票
+        String userTicket = getCookie(request, USER_REDIS_TICKET);
+
+        // 1. 清除userTicket票据，redis/cookie
+        deleteCookie(USER_REDIS_TICKET, response);
+        redisOperator.del(USER_REDIS_TICKET + ":" + userTicket);
+
+        // 2. 清除用户全局会话（分布式会话）
+        redisOperator.del(USER_REDIS_TOKEN + ":" + userId);
+
+        return ResultJSONResult.ok();
+    }
+
+    private void deleteCookie(String key,
+                              HttpServletResponse response) {
+
+        Cookie cookie = new Cookie(key, null);
+        cookie.setDomain("sso.com");
+        cookie.setPath("/");
+        cookie.setMaxAge(-1);
+        response.addCookie(cookie);
+    }
 }
