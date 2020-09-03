@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -50,11 +51,40 @@ public class HelloController {
                         HttpServletResponse response) {
 
         model.addAttribute("returnUrl", returnUrl);
+        // 1. 获取userTicket门票，如果cookie中能够获取到，证明用户登录过，此时签发一个一次性的临时票据并且回跳
+        String userTicket = getCookie(request, TICKET_COOKIE);
 
-        //TODO 后续完善是否登录
-
-        //用户从未登录过，第一次进入则跳转到CAS登录页面
+        boolean isVerified = verifyUserTicket(userTicket);
+        if (isVerified) {
+            String tmpTicket = createTmpTicket();
+            return "redirect:" + returnUrl + "?tmpTicket=" + tmpTicket;
+        }
+        // 2. 用户从未登录过，第一次进入则跳转到CAS的统一登录页面
         return "login";
+    }
+
+    /**
+     * 校验CAS全局用户门票
+     *
+     * @param userTicket
+     * @return
+     */
+    private boolean verifyUserTicket(String userTicket) {
+        // 0. 验证CAS门票不能为空
+        if (StringUtils.isBlank(userTicket)) {
+            return false;
+        }
+        // 1. 验证CAS门票是否有效
+        String userId = redisOperator.get(USER_REDIS_TICKET + ":" + userTicket);
+        if (StringUtils.isBlank(userId)) {
+            return false;
+        }
+        // 2. 验证门票对应的user会话是否存在
+        String userRedis = redisOperator.get(USER_REDIS_TOKEN + ":" + userId);
+        if (StringUtils.isBlank(userRedis)) {
+            return false;
+        }
+        return true;
     }
 
 
@@ -107,11 +137,63 @@ public class HelloController {
         //5.生成临时票据，回跳到调用网站，是由CAS端所签发的一个一次性的临时票据
         String tmpTicket = createTmpTicket();
 
-        return "redict:" + returnUrl + "?tmpTicket=" + tmpTicket;
+        return "redirect:" + returnUrl + "?tmpTicket=" + tmpTicket;
     }
 
-    //TODO 缺少一步验证临时票据的过程
+    @PostMapping("/verifyTmpTicket")
+    @ResponseBody
+    public ResultJSONResult verifyTmpTicket(String tmpTicket,
+                                            HttpServletRequest request,
+                                            HttpServletResponse response) throws Exception {
 
+        // 使用一次性临时票据来验证用户是否登录，如果登录过，把用户会话信息返回给站点
+        // 使用完毕后，需要销毁临时票据
+        String tempTicketValue = redisOperator.get(USER_TMP_TICKET + ":" + tmpTicket);
+
+        if (StringUtils.isBlank(tempTicketValue)) {
+            return ResultJSONResult.errorUserTicket("用户票据异常");
+        }
+
+        if (!MD5Utils.getMD5Str(tmpTicket).equals(tempTicketValue)) {
+            return ResultJSONResult.errorUserTicket("用户票据异常");
+        } else {
+            // 销毁临时票据
+            redisOperator.del(USER_TMP_TICKET + ":" + tmpTicket);
+        }
+
+        //1. 验证并且获取用户的userTicket
+        String userTicket = getCookie(request, TICKET_COOKIE);
+        String userId = redisOperator.get(USER_REDIS_TICKET + ":" + userTicket);
+        if (StringUtils.isBlank(userId)) {
+            return ResultJSONResult.errorUserTicket("用户票据异常");
+        }
+
+        // 2. 验证门票对应的user会话是否存在
+        String userRedis = redisOperator.get(USER_REDIS_TOKEN + ":" + userId);
+        if (StringUtils.isBlank(userRedis)) {
+            return ResultJSONResult.errorUserTicket("用户票据异常");
+        }
+
+        // 验证成功，返回OK，携带用户会话
+        return ResultJSONResult.ok(JsonUtils.jsonToPojo(userRedis, UsersVO.class));
+    }
+
+    private String getCookie(HttpServletRequest request, String key) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null || StringUtils.isBlank(key)) {
+            return null;
+        }
+
+        String cookieValue = null;
+        for (int i = 0; i < cookies.length; i++) {
+            if (cookies[i].getName().equals(key)) {
+                cookieValue = cookies[i].getValue();
+                break;
+            }
+        }
+        return cookieValue;
+    }
 
     private void setCookie(String key, String value, HttpServletResponse response) {
         Cookie cookie = new Cookie(key, value);
