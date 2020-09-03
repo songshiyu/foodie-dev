@@ -28,7 +28,7 @@ import java.util.UUID;
  **/
 
 @Controller
-public class HelloController {
+public class SSOController {
 
     @Autowired
     private UserService userService;
