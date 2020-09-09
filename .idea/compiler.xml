@@ -10,6 +10,7 @@
         <module name="foodie-common" />
         <module name="foodie-mapper" />
         <module name="foodie-pojo" />
+        <module name="foodie-search" />
         <module name="foodie-service" />
         <module name="foodie-sso" />
       </profile>
@@ -20,6 +21,7 @@
       <module name="foodie-dev" target="1.8" />
       <module name="foodie-mapper" target="1.8" />
       <module name="foodie-pojo" target="1.8" />
+      <module name="foodie-search" target="1.8" />
       <module name="foodie-service" target="1.8" />
       <module name="foodie-sso" target="1.8" />
     </bytecodeTargetLevel>
