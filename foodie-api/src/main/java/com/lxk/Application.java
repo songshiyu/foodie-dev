@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tk.mybatis.spring.annotation.MapperScan;
 
@@ -25,7 +24,6 @@ import tk.mybatis.spring.annotation.MapperScan;
 /**开启定时任务*/
 @EnableScheduling
 /** 开启使用redis作为spring session*/
-@EnableRedisHttpSession
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class,args);

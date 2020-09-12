@@ -1,9 +1,14 @@
 spring:
   datasource:                                                  #数据源的相关配置
+    type: com.zaxxer.hikari.HikariDataSource                    #数据源类型：Hikaricp
+    driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/foodie-shop?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
-    password: root
+    username: root
+    password: lxk4dhr
   data:
     elasticsearch:
       cluster-nodes: 192.168.137.10:9300
       cluster-name: es6
+server:
+  port: 8033
 
