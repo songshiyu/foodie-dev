@@ -63,8 +63,8 @@ public class ItemESServiceImpl implements ItemESService {
         NativeSearchQuery query = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.matchQuery(itemNameFiled, keyword))
                 .withHighlightFields(new HighlightBuilder.Field(itemNameFiled)
-                        .preTags(preTag)
-                        .postTags(postTag))
+                       /* .preTags(preTag)
+                        .postTags(postTag)*/)
                 .withSort(sortBuilder)
                 .withPageable(pageable)
                 .build();
