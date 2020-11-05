@@ -13,6 +13,8 @@ import com.lxk.pojo.vo.ShopcartVO;
 import com.lxk.service.ItemService;
 import com.lxk.utils.DesensitizationUtil;
 import com.lxk.utils.PagedGridResult;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author songshiyu
@@ -45,6 +48,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private ItemsMapperCustom itemsMapperCustom;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
@@ -176,7 +182,7 @@ public class ItemServiceImpl implements ItemService {
         return result != null ? result.getUrl() : "";
     }
 
-    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = {})
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = {})
     @Override
     public void decreaseItemSpecStock(String specId, int buyCount) {
         /**
@@ -190,13 +196,22 @@ public class ItemServiceImpl implements ItemService {
         int stock = 2;
 
         //2.判断库存，是否能够减少到0以下，此处会涉及到多线程问题，超卖
-        if (stock - buyCount < 0){
+        if (stock - buyCount < 0) {
             //提示用于库存不够
             throw new RuntimeException("订单创建失败，原因：库存不足");
         }
-        int result = itemsMapperCustom.decreaseItemSpecStock(specId, buyCount);
-        if (result != 1){
-            throw new RuntimeException("订单创建失败，原因：库存不足");
+
+        RLock lock = redissonClient.getLock("Item_lock" + specId);
+        lock.lock(5, TimeUnit.SECONDS);
+        try {
+            int result = itemsMapperCustom.decreaseItemSpecStock(specId, buyCount);
+            if (result != 1) {
+                throw new RuntimeException("订单创建失败，原因：库存不足");
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } finally {
+            lock.unlock();
         }
     }
 
